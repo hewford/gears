@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+    #gears-loader {
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        width: 480px;
+        height: 960px;
+        position: relative;
+        margin: auto;
+    }
+
+    form {
+        position: absolute;
+        top: 1em;
+        left: 1em;
+    }
+
+    path {
+        fill-rule: evenodd;
+        stroke: C32529;
+        stroke-width: 2px;
+    }
+
+    .dlock2 path {
+        fill: #C32529;
+        z-index: 2;
+    }
+
+    .innerGear path {
+        fill: #FFF;
+        z-index: 2;
+    }
+
+    .innerGearHole path {
+        fill: #C32529;
+    }
+
+    .outerGear path {
+        fill: #FFF;
+        z-index: 2;
+    }
+
+    .dlock {
+        width: 480px;
+        height: 680px;
+        position: absolute;
+        bottom: 235px;
+        z-index: -1;
+    }
+
+    .hinge path {
+        fill: #C32529;
+    }
+
+    .hinge.locked path {
+        margin-top: 100px;
+    }
+
+    .gears {
+        z-index: 3;
+    }
+</style>
+
+<body>
+    <div id="gears-loader">
+    </div>
+</body>
+<script src="https://d3js.org/d3.v3.min.js"></script>
+<script>
+    const width = 480;
+    var height = width * 2,
+        radius = width / 6,
+        x = Math.sin(2 * Math.PI / 3),
+        y = Math.cos(2 * Math.PI / 3);
+    var outerGearRadius = radius * -5;
+    var innerGearRadius = radius * -3;
+    var outerGearTeeth = width / 12 / 2;
+    var innerGearTeeth = width / 20 / 2;
+
+    var offset = 0,
+        speed = 15,
+        start = Date.now();
+
+    var svg = d3.select("#gears-loader").append("svg")
+        .attr("class", "gears")
+        .attr("width", width)
+        .attr("height", height)
+        .append("g")
+        .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")scale(.25)")
+        .append("g");
+
+    var frame = svg.append("g")
+        .datum({ radius: Infinity });
+
+    frame.append("g")
+        .attr("class", "dlock2")
+        .attr("transform", "translate(-446,-809)scale(35)")
+        .append("path")
+        .attr("d", "m 21.77,14.22 v 0 c -1.480088,-1.714287 -3.34,-2.46 -3.34,-2.46 v 0 C 12.592928,8.8008745 5.4617585,10.811568 2.0313313,16.38236 -1.3989921,21.952984 0.01803979,29.221378 5.2869286,33.102056 10.555817,36.982735 17.917422,36.180043 22.21984,31.251741 26.522388,26.32329 26.327344,18.916642 21.77,14.22 Z m -1.9,-1.75 c -13.0933333,-7.98 -6.546667,-3.99 0,0 z m -1.72,18.88 c -11.9466667,-20.566667 -5.973333,-10.283333 0,0 z");
+
+    var hinge = frame.append("g")
+        .attr("class", "hinge")
+        .attr("id", "hinge")
+        .attr("transform", "translate(-446,-809)scale(35)")
+        .append("path")
+        .attr("d", "m 18.43,11.76 c 1.44,0.71 1.9,1 3.34,2.46 V 9.76 C 21.907699,4.6726436 17.90993,0.42965139 12.823391,0.26459334 7.7368518,0.09953529 3.4724128,4.074419 3.28,9.16 L 3.17,10.84 6.61,8.93 6.69,8.51 c 0.5871645,-2.8042863 3.075083,-4.8021602 5.94,-4.77 3.222734,-0.028265 5.839359,2.5973823 5.8,5.82 v 2.2 M 12.63,2.3 C 9.1615399,2.2607386 6.1274252,4.6266009 5.32,8 L 4.84,8.27 C 6.6778062,-0.97982398 20.289079,0.32945916 20.33,9.76 v 3 L 19.87,12.47 V 9.56 C 19.920691,5.5374475 16.652677,2.2604057 12.63,2.3 Z");
+
+    var outer = frame.append("g")
+        .attr("class", "outerGear")
+        .attr("transform", "scale(0.80)")
+        .datum({ teeth: outerGearTeeth, radius: outerGearRadius, outerGear: true })
+        .append("path")
+        .attr("d", gear);
+
+    var inner = frame.append("g")
+        .attr("class", "innerGear")
+        .attr("transform", "translate(0," + radius * 1.6 + ")scale(0.80)")
+        .datum({ teeth: innerGearTeeth, radius: innerGearRadius })
+        .append("path")
+        .attr("d", gear);
+
+
+    d3.select("#hinge")
+        .transition()
+        .duration(3000)
+        .attr("transform", "translate(-446,-670)scale(35)")
+
+    // setInterval(() => {
+    //     if (setOpen) {
+    //         setOpen = false
+    //         d3.select("#hinge")
+    //             .transition()
+    //             .duration(3500)
+    //             .attr("transform", "translate(-446,-670)scale(35)")
+    //     } else {
+    //         setOpen = true
+    //         d3.select("#hinge")
+    //             .transition()
+    //             .duration(3500)
+    //             .attr("transform", "translate(-446,-808)scale(35)")
+    //     }
+    // }, 4000)
+    // var radius1 = -900000;
+    // var radius0 = frame.datum().radius, angle = (Date.now() - start) * speed;
+    // frame.datum({ radius: radius1 });
+    // svg.attr("transform", "rotate(" + (offset += angle / radius0 - angle / radius1) + ")");
+
+    // frame.append("g")
+    //     .attr("class", "innerGearHole")
+    //     .attr("transform", "translate(0," + radius * 1.7 + ")scale(0.60)")
+    //     .datum({ teeth: innerGearTeeth, radius: innerGearRadius })
+    //     .append("path")
+    //     .attr("d", gear);
+
+    function gear(d) {
+        const innerGearHoleSize = 145;
+        const outerGearThickness = 85;
+        var n = d.teeth,
+            r2 = Math.abs(d.radius),
+            r0 = r2 - 25,
+            r1 = r2 + 28,
+            r3 = d.outerGear ?
+                (r3 = r0, r0 = r1, r1 = r3, r2 + outerGearThickness) :
+                innerGearHoleSize,
+            da = Math.PI / n,
+            a0 = -Math.PI / 2 + (d.outerGear ? Math.PI / n : 0),
+            i = -1,
+            path = ["M", r0 * Math.cos(a0), ",", r0 * Math.sin(a0)];
+        while (++i < n) path.push(
+            "A", r0, ",", r0, " 0 0,1 ", r0 * Math.cos(a0 += da), ",", r0 * Math.sin(a0),
+            "L", r2 * Math.cos(a0), ",", r2 * Math.sin(a0),
+            "L", r1 * Math.cos(a0 += da / 3), ",", r1 * Math.sin(a0),
+            "A", r1, ",", r1, " 0 0,1 ", r1 * Math.cos(a0 += da / 3), ",", r1 * Math.sin(a0),
+            "L", r2 * Math.cos(a0 += da / 3), ",", r2 * Math.sin(a0),
+            "L", r0 * Math.cos(a0), ",", r0 * Math.sin(a0));
+        path.push("M0,", -r3, "A", r3, ",", r3, " 0 0,0 0,", r3, "A", r3, ",", r3, " 0 0,0 0,", -r3, "Z");
+        return path.join("");
+    }
+
+    // let count = 0
+    // setInterval(() => {
+    //     var angle = 21600;
+    //     transform = function (d) { return "rotate(" + angle / d.radius + ")"; };
+    //     frame.selectAll("path").attr("transform", transform);
+    //     frame.attr("transform", transform); // frame of reference
+    //     // count++
+    //     // console.log(count)
+    //     // if (count == 21) {
+    //     //     speed = speed * -1
+    //     //     console.log((Date.now() - start) * speed)
+    //     //     console.log((Date.now() - start) * -1 * speed)
+    //     // }
+    // }, 500)
+
+    let setOpen = false
+
+    const changeDir = () => {
+        // start = Date.now();
+        // speed = speed * -1
+        const nextSpeed = speed * -1
+        speed = 0;
+
+        setTimeout(() => {
+            start = Date.now();
+            speed = nextSpeed;
+            if (setOpen) {
+                setOpen = false
+                d3.select("#hinge")
+                    .transition()
+                    .duration(3000)
+                    .attr("transform", "translate(-446,-670)scale(35)")
+            } else {
+                setOpen = true
+                d3.select("#hinge")
+                    .transition()
+                    .duration(3000)
+                    .attr("transform", "translate(-446,-809)scale(35)")
+            }
+        }, 250)
+
+    }
+
+
+    d3.timer(function () {
+        console.log(Math.abs((Date.now() - start) * speed))
+        if (Math.abs((Date.now() - start) * speed) > (21600 * 2)) {
+            changeDir()
+        }
+        var angle = (Date.now() - start) * speed,
+            transform = function (d) { return "rotate(" + angle / d.radius + ")"; };
+        frame.selectAll("path").attr("transform", transform);
+        frame.attr("transform", transform); // frame of reference
+    });
+
+</script>
